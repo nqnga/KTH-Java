@@ -1,0 +1,55 @@
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# Windows Installer files
+*.cab
+*.msi
+*.msm
+*.msp
+
+# =========================
+# Operating System Files
+# =========================
+
+# OSX
+# =========================
+
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Icon must end with two \r
+Icon
+
+# Thumbnails
+._*
+
+# Files that might appear on external disk
+.Spotlight-V100
+.Trashes
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+*.version
+.metadata/.plugins/org.eclipse.jdt.core/assumedExternalFilesCache
+.metadata/.plugins/org.eclipse.jdt.core/externalFilesCache
+.metadata/.plugins/org.eclipse.jdt.core/externalLibsTimeStamps
+.metadata/.plugins/org.eclipse.jdt.core/invalidArchivesCache
+.metadata/.plugins/org.eclipse.jdt.core/nonChainingJarsCache
+.metadata/.plugins/org.eclipse.jdt.core/variablesAndContainers.dat
+.metadata/.plugins/org.eclipse.m2e.logback.configuration/0.log
+*.class
+*.index
+.metadata/.plugins/org.eclipse.m2e.logback.configuration/logback.1.5.0.20140606-0033.xml

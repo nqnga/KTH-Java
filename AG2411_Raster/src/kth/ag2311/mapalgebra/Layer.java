@@ -1,10 +1,16 @@
 package kth.ag2311.mapalgebra;
 
+import java.awt.image.BufferedImage;
+import java.awt.image.WritableRaster;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
 
 /**
  * What does Layer class use for?
@@ -60,6 +66,16 @@ public class Layer {
 	 */
 	public double nullValue;
 
+	/**
+	 * max value of matrix values
+	 */
+	public double maxValue;
+
+	/**
+	 * min value of matrix values
+	 */
+	public double minValue;
+
 	// //////////////////////////////////////////
 	// Methods
 	//
@@ -69,24 +85,31 @@ public class Layer {
 	 * 
 	 * @param layerName
 	 *            Name of layer
-	 * @param fileName
-	 *            Path of filename
+	 * @param inputFile
+	 *            Path of input file
 	 */
-	public Layer(String layerName, String fileName) {
+	public Layer(String layerName, String inputFile) {
 		// Name this layer with layerName
 		this.name = layerName;
-		this.path = fileName;
+		this.path = inputFile;
 
+		System.out.println("Loading... " + inputFile);
+		
 		// use buffering, reading one line at a time
 		// Exception may be thrown while reading (and writing) a file.
 		BufferedReader bufReader = null; // obj for reading file
 
 		// try to read content of fileName (path)
 		try {
-			bufReader = new BufferedReader(new FileReader(fileName)); //put data of filename to obj
+			bufReader = new BufferedReader(new FileReader(inputFile)); // put
+																		// data
+																		// of
+																		// filename
+																		// to
+																		// obj
 
 			String line = null;
-			String[] words; //separate by a space
+			String[] words; // separate by a space
 
 			// read #01 line - nCols int
 			line = bufReader.readLine();
@@ -141,6 +164,9 @@ public class Layer {
 
 			// IMPORTANT! Don't forget to create a matrix 2D of values
 			values = new double[nRows][nCols];
+			minValue = Double.MAX_VALUE;
+			maxValue = Double.MIN_VALUE;
+
 			// continue read data
 			for (int i = 0; i < nRows; i++) { // loop nRows
 				line = bufReader.readLine();
@@ -150,12 +176,15 @@ public class Layer {
 					words = line.split(" ");
 
 					for (int j = 0; j < nCols; j++) { // loop nCols
-						// get word jth in words
-						String numValue = words[j];
-						
-						// try to convert String to Int
-						// and assign value to 2D-values
-						values[i][j] = Double.parseDouble(numValue);
+						// get value of word jth in words
+						double value = Double.parseDouble(words[j]);
+
+						// assign value to 2D-values
+						values[i][j] = value;
+						if (minValue > value)
+							minValue = value;
+						if (maxValue < value)
+							maxValue = value;
 					}
 				}
 			}
@@ -172,13 +201,15 @@ public class Layer {
 			}
 		}
 
+		System.out.println("Loaded!");
 	}
 
 	/**
 	 * Display all value of Layer class to console
 	 * 
-	 * @param allContentData do you want to show all DAtA
-	 * 			
+	 * @param allContentData
+	 *            do you want to show all DATA, true=show, false=not show
+	 * 
 	 */
 	public void print(boolean allContentData) {
 		System.out.println("Layer:	" + name);
@@ -206,10 +237,10 @@ public class Layer {
 	 * Save value of Layer class into text file The file format can be imported
 	 * to ArcGIS
 	 * 
-	 * @param fileName
-	 *            Path of filename
+	 * @param outputFile
+	 *            Path of output file
 	 */
-	public void save(String fileName) {
+	public void save(String outputFile) {
 		System.out.println("Saving...");
 
 		// use buffering, writing one line at a time
@@ -220,7 +251,7 @@ public class Layer {
 		try {
 			// use buffering, writing one line at a time
 			// Exception may be thrown while reading (and writing) a file.
-			bufWriter = new BufferedWriter(new FileWriter(fileName));
+			bufWriter = new BufferedWriter(new FileWriter(outputFile));
 
 			String line = null;
 
@@ -269,7 +300,7 @@ public class Layer {
 				bufWriter.write(line);
 				// make a break, and continue to saving a next row
 				bufWriter.newLine();
-			}		
+			}
 
 		} catch (NumberFormatException ex) {
 			ex.printStackTrace();
@@ -283,8 +314,82 @@ public class Layer {
 			}
 		}
 
-		System.out.println("DONE. Try to import to ArcGIS!");
+		System.out.println("Saved!");
+		System.out.println("You can try to import to ArcGIS!");
+	}
+
+	/**
+	 * show this Layer as an gray scale image on the screen
+	 */
+	public void map() {
+		BufferedImage image = new BufferedImage(nRows, nCols,
+				BufferedImage.TYPE_INT_RGB);
+		WritableRaster raster = image.getRaster();
+		int[] color = new int[3];
+
+		// write data to raster
+		for (int i = 0; i < nRows; i++) { // loop nRows
+			for (int j = 0; j < nCols; j++) { // loop nCols
+				// create color for this point
+				if (values[i][j]==nullValue) {
+					color[0] = 0; // Red
+					color[1] = 0; // Green
+					color[2] = 0; // Blue
+				} else {
+					int grayscale = (int) Math.floor(values[i][j] - minValue);
+					color[0] = grayscale; // Red
+					color[1] = grayscale; // Green
+					color[2] = grayscale; // Blue
+				}
+				raster.setPixel(i, j, color);
+			}
+		}
+
+		// show this image on the screen
+		JFrame jframe = new JFrame();
+		JLabel jlabel = new JLabel();
+		ImageIcon ii = new ImageIcon(image);
+
+		jlabel.setIcon(ii);
+		jframe.add(jlabel);
+		jframe.setSize(nRows, nCols);
+		jframe.setVisible(true);
 
 	}
 
+	/**
+	 * show this Layer as an color image on the screen using 24bit RGBA
+	 * 
+	 * @param colorScheme
+	 *            value of 24bit RGBA
+	 */
+	public void map(double[] colorScheme) {
+		BufferedImage image = new BufferedImage(nRows, nCols, BufferedImage.TYPE_INT_RGB); 
+		WritableRaster raster = image.getRaster();
+		double[] attr = new double [4];
+		
+		// write data to raster
+		for (int i = 0; i < nRows; i++) { // loop nRows
+			for (int j = 0; j < nCols; j++) { // loop nCols
+				// create color for this point
+				double value = values[i][j];
+				attr[0] = (colorScheme[0] * value) / 255f; // read
+				attr[1] = (colorScheme[1] * value) / 255f; // green
+				attr[2] = (colorScheme[2] * value) / 255f; // blue
+				attr[3] = colorScheme[3] / 255f; // alpha
+				raster.setPixel(i, j, attr);
+			}
+		}
+		
+		// show this image on the screen
+		JFrame jframe = new JFrame();
+		JLabel jlabel = new JLabel();
+		ImageIcon ii = new ImageIcon(image);
+		
+		jlabel.setIcon(ii);
+		jframe.add(jlabel);
+		jframe.setSize(nRows, nCols);
+		jframe.setVisible(true);
+		
+	}
 }

@@ -478,11 +478,26 @@ public class Layer {
 		ArrayList<Integer> neighbors = new ArrayList<Integer>();
 
 		int sizeOfFilter = radius*2 + 1;
-		
-		// create deltaX and deltaY
-		int[][] deltaX = new int[sizeOfFilter][sizeOfFilter];
-		int[][] deltaY = new int[sizeOfFilter][sizeOfFilter];
 
+		// create deltaX and deltaY
+		int delta = -radius; 
+		int[][] dY = new int[sizeOfFilter][sizeOfFilter];
+		for (int i=0; i<sizeOfFilter; i++) {
+			for (int j=0; j<sizeOfFilter; j++) {
+				dY[i][j] = delta;
+			}
+			delta++;
+		}
+		
+		int[][] dX = new int[sizeOfFilter][sizeOfFilter];
+		for (int i=0; i<sizeOfFilter; i++) {
+			delta = -radius; 
+			for (int j=0; j<sizeOfFilter; j++) {
+				dX[i][j] = delta;
+				delta++;
+			}
+		}
+		
 		// create mask layer
 		int[][] mask = new int[sizeOfFilter][sizeOfFilter];
 		

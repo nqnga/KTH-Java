@@ -7,6 +7,7 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -48,7 +49,8 @@ public class Layer {
 	 * Two double values representing the coordinates of the lower left corner
 	 * of the layer
 	 */
-	public double[] origin = new double[2];
+	public double originX;
+	public double originY;
 
 	/**
 	 * Resolution of the layer
@@ -94,19 +96,15 @@ public class Layer {
 		this.path = inputFile;
 
 		System.out.println("Loading... " + inputFile);
-		
+
 		// use buffering, reading one line at a time
 		// Exception may be thrown while reading (and writing) a file.
 		BufferedReader bufReader = null; // obj for reading file
 
 		// try to read content of fileName (path)
 		try {
-			bufReader = new BufferedReader(new FileReader(inputFile)); // put
-																		// data
-																		// of
-																		// filename
-																		// to
-																		// obj
+			// put data of filename to obj Reader
+			bufReader = new BufferedReader(new FileReader(inputFile));
 
 			String line = null;
 			String[] words; // separate by a space
@@ -135,7 +133,7 @@ public class Layer {
 			if (line != null) {
 				words = line.split(" ");
 				String numValue = words[words.length - 1];
-				origin[0] = Double.parseDouble(numValue);
+				originX = Double.parseDouble(numValue);
 			}
 
 			// read #04 line - yllcorner double
@@ -143,7 +141,7 @@ public class Layer {
 			if (line != null) {
 				words = line.split(" ");
 				String numValue = words[words.length - 1];
-				origin[1] = Double.parseDouble(numValue);
+				originY = Double.parseDouble(numValue);
 			}
 
 			// read #05 line - cellsize double
@@ -205,6 +203,39 @@ public class Layer {
 	}
 
 	/**
+	 * Construction method of Layer class with input fields
+	 * 
+	 * @param layerName
+	 *            name of Layer
+	 * @param nrow
+	 *            Number of rows
+	 * @param ncol
+	 *            Number of col
+	 * @param oX
+	 *            the Origin of X
+	 * @param oY
+	 *            the Origin of Y
+	 * @param res
+	 *            resolution of layer
+	 * @param nullVal
+	 *            NODATA value
+	 */
+	public Layer(String layerName, int nrow, int ncol, double oX, double oY,
+			double res, double nullVal) {
+		this.name = layerName;
+		this.nRows = nrow;
+		this.nCols = ncol;
+		this.originX = oX;
+		this.originY = oY;
+		this.resolution = res;
+		this.nullValue = nullVal;
+
+		// IMPORTANT! Don't forget to create a matrix 2D of values
+		values = new double[nRows][nCols];
+
+	}
+
+	/**
 	 * Display all value of Layer class to console
 	 * 
 	 * @param allContentData
@@ -218,8 +249,8 @@ public class Layer {
 
 		System.out.println("ncols			" + nCols);
 		System.out.println("nrows			" + nRows);
-		System.out.println("xllcorner 		" + origin[0]);
-		System.out.println("yllcorner 		" + origin[1]);
+		System.out.println("xllcorner 		" + originX);
+		System.out.println("yllcorner 		" + originY);
 		System.out.println("cellsize 		" + resolution);
 		System.out.println("NODATA_value		" + nullValue);
 
@@ -266,12 +297,12 @@ public class Layer {
 			bufWriter.newLine();
 
 			// write #03 line - xllcorner double
-			line = "xllcorner 		" + origin[0];
+			line = "xllcorner 		" + originX;
 			bufWriter.write(line);
 			bufWriter.newLine();
 
 			// write #04 line - yllcorner double
-			line = "yllcorner 		" + origin[1];
+			line = "yllcorner 		" + originY;
 			bufWriter.write(line);
 			bufWriter.newLine();
 
@@ -319,8 +350,14 @@ public class Layer {
 	}
 
 	/**
+	 * Default RGB for NODATA cells
+	 */
+	private final static int[] nullGray = {0,0,0} ;
+	
+	/**
 	 * show this Layer as an gray scale image on the screen
 	 */
+	
 	public void map() {
 		BufferedImage image = new BufferedImage(nRows, nCols,
 				BufferedImage.TYPE_INT_RGB);
@@ -331,10 +368,10 @@ public class Layer {
 		for (int i = 0; i < nRows; i++) { // loop nRows
 			for (int j = 0; j < nCols; j++) { // loop nCols
 				// create color for this point
-				if (values[i][j]==nullValue) {
-					color[0] = 0; // Red
-					color[1] = 0; // Green
-					color[2] = 0; // Blue
+				if (values[i][j] == nullValue) {
+					color[0] = nullGray[0]; // Red
+					color[1] = nullGray[1]; // Green
+					color[2] = nullGray[2]; // Blue
 				} else {
 					int grayscale = (int) Math.floor(values[i][j] - minValue);
 					color[0] = grayscale; // Red
@@ -356,6 +393,10 @@ public class Layer {
 		jframe.setVisible(true);
 
 	}
+	/**
+	 * Default RGBA for NODATA cells
+	 */
+	private final static double[] nullColor = {0f,0f,0f,1f} ;
 
 	/**
 	 * show this Layer as an color image on the screen using 24bit RGBA
@@ -364,32 +405,140 @@ public class Layer {
 	 *            value of 24bit RGBA
 	 */
 	public void map(double[] colorScheme) {
-		BufferedImage image = new BufferedImage(nRows, nCols, BufferedImage.TYPE_INT_RGB); 
+		BufferedImage image = new BufferedImage(nRows, nCols,
+				BufferedImage.TYPE_INT_RGB);
 		WritableRaster raster = image.getRaster();
-		double[] attr = new double [4];
-		
+		double[] attr = new double[4];
+
 		// write data to raster
 		for (int i = 0; i < nRows; i++) { // loop nRows
 			for (int j = 0; j < nCols; j++) { // loop nCols
 				// create color for this point
 				double value = values[i][j];
-				attr[0] = (colorScheme[0] * value) / 255f; // read
-				attr[1] = (colorScheme[1] * value) / 255f; // green
-				attr[2] = (colorScheme[2] * value) / 255f; // blue
-				attr[3] = colorScheme[3] / 255f; // alpha
+				if (value == nullValue) {
+					attr[0] = nullColor[0]; // read
+					attr[1] = nullColor[1]; // green
+					attr[2] = nullColor[2]; // blue
+					attr[3] = nullColor[3]; // alpha
+				} else {
+					attr[0] = (colorScheme[0] * value) / 255f; // read
+					attr[1] = (colorScheme[1] * value) / 255f; // green
+					attr[2] = (colorScheme[2] * value) / 255f; // blue
+					attr[3] = colorScheme[3] / 255f; // alpha
+				}
 				raster.setPixel(i, j, attr);
 			}
 		}
-		
+
 		// show this image on the screen
 		JFrame jframe = new JFrame();
 		JLabel jlabel = new JLabel();
 		ImageIcon ii = new ImageIcon(image);
-		
+
 		jlabel.setIcon(ii);
 		jframe.add(jlabel);
 		jframe.setSize(nRows, nCols);
 		jframe.setVisible(true);
-		
+
 	}
+
+	/**
+	 * Create a layer with values equal sum of this.values + inLayer.values
+	 * 
+	 * @param inLayer
+	 *            obj of inLayer
+	 * @param outLayerName
+	 *            name of outLayer
+	 * @return obj of ourLayer
+	 */
+	public Layer localSum(Layer inLayer, String outLayerName) {
+		Layer outLayer = new Layer(outLayerName, nRows, nCols, originX,
+				originY, resolution, nullValue);
+
+		for (int i = 0; i < nRows; i++) { // loop nRows
+			for (int j = 0; j < nCols; j++) { // loop nCols
+				if ((this.values[i][j] == this.nullValue)
+						|| (inLayer.values[i][j] == inLayer.nullValue)) {
+					
+					outLayer.values[i][j] = outLayer.nullValue;
+				
+				} else {
+					
+					outLayer.values[i][j] = this.values[i][j]
+							+ inLayer.values[i][j];
+				}
+			}
+		}
+		
+		return outLayer;
+	}
+	
+	
+	private ArrayList<Integer> getNeighborhood(int idx, int radius, boolean square) {
+		ArrayList<Integer> neighbors = new ArrayList<Integer>();
+
+		int sizeOfFilter = radius*2 + 1;
+		
+		// create deltaX and deltaY
+		int[][] deltaX = new int[sizeOfFilter][sizeOfFilter];
+		int[][] deltaY = new int[sizeOfFilter][sizeOfFilter];
+
+		// create mask layer
+		int[][] mask = new int[sizeOfFilter][sizeOfFilter];
+		
+		
+		return neighbors;
+	}
+	
+	
+	public Layer focalVariety(int radius, boolean square, String outLayerName) {
+		Layer outLayer = new Layer(outLayerName, nRows, nCols, originX,
+				originY, resolution, nullValue);
+
+		for (int i = 0; i < nRows; i++) { // loop nRows
+			for (int j = 0; j < nCols; j++) { // loop nCols
+				// calculate index of cell
+				int index = i * nCols + j;
+				ArrayList<Integer> neighbors = getNeighborhood(index, radius, square);
+				
+				// get number of neighbors, if it is empty then continue
+				int numOfNeighbors = 0;
+				if (neighbors.isEmpty()) { 
+					continue;
+				} else {
+					numOfNeighbors = neighbors.size();
+				}
+				
+				// calculate sum of neighbors
+				int sum = 0;
+				for (int k=0; k<numOfNeighbors; k++ ) {
+					int value = neighbors.get(k);
+					if (value != this.nullValue) 
+						sum = sum + value;
+					// else ignore !!!
+				}
+				
+				// assign to cell in outLayer
+				outLayer.values[i][j] = sum;
+
+			}
+		}
+
+
+		
+		
+		return outLayer;
+	}
+	
+	
+	public Layer zonalMinimum(Layer zoneLayer, String outLayerName) {
+		Layer outLayer = new Layer(outLayerName, nRows, nCols, originX,
+				originY, resolution, nullValue);
+
+		
+		return outLayer;
+	}
+	
+	
+
 }

@@ -521,14 +521,29 @@ public class Layer {
 		return outLayer;
 	}
 	
+	/**
+	 * Internal Radius using in focalVariety method
+	 */
+	private int Radius;
 	
+	/**
+	 * Internal deltaRow using in getNeighborhood method
+	 */
 	private int[][] dRow;
+	
+	/**
+	 * Internal deltaCol using in getNeighborhood method
+	 */
 	private int[][] dCol;
 	
-	private void createDelta(int radius) {
-		int size = radius*2 + 1;
+	/**
+	 * Create deltaRow and deltaCol
+	 * Note: call it once for saving processing
+	 */
+	private void createDelta() {
+		int size = Radius*2 + 1;
 
-		int delta = -radius; 
+		int delta = -Radius; 
 		this.dRow = new int[size][size];
 		for (int i=0; i<size; i++) {
 			for (int j=0; j<size; j++) {
@@ -539,7 +554,7 @@ public class Layer {
 		
 		this.dCol = new int[size][size];
 		for (int i=0; i<size; i++) {
-			delta = -radius; 
+			delta = -Radius; 
 			for (int j=0; j<size; j++) {
 				this.dCol[i][j] = delta;
 				delta++;
@@ -547,11 +562,19 @@ public class Layer {
 		}
 	}
 	
-	
+	/**
+	 * Internal Mask: square or circle
+	 * Using getNeighborhood method
+	 */
 	private int[][] mask;
 	
-	private void createMask(int radius, boolean square) {
-		int size = radius*2 + 1;
+	/**
+	 * Create a square or a circle mask
+	 * 
+	 * @param square TRUE=square, FALSE=circle
+	 */
+	private void createMask(boolean square) {
+		int size = Radius*2 + 1;
 		this.mask = new int[size][size];
 		if (square) {
 			for (int i=0; i<size; i++) {
@@ -569,11 +592,11 @@ public class Layer {
 			}
 
 			// get circle boundary
-			int xC = radius;
-			int yC = radius;
-			int d = (5 - radius * 4)/4;
+			int xC = Radius;
+			int yC = Radius;
+			int d = (5 - Radius * 4)/4;
 			int x = 0;
-			int y = radius;
+			int y = Radius;
 			do {
 				this.mask[yC + y][xC + x] = 1;
 				this.mask[yC - y][xC + x] = 1;
@@ -611,9 +634,15 @@ public class Layer {
 				
 	}
 		
-	private ArrayList<Integer> getNeighborhood(int rIdx, int cIdx, int radius) {
+	/**
+	 * Get all neighbor values of cell (row,col)
+	 * @param rIdx Row index
+	 * @param cIdx Column index
+	 * @return List of neighbor values
+	 */
+	private ArrayList<Integer> getNeighborhood(int rIdx, int cIdx) {
 		ArrayList<Integer> neighbors = new ArrayList<Integer>();
-		int size = radius*2 + 1;
+		int size = Radius*2 + 1;
 		for (int i=0; i<size; i++) {
 			for (int j=0; j<size; j++) {
 				if (this.mask[i][j] == 1) {
@@ -629,20 +658,28 @@ public class Layer {
 		return neighbors;
 	}
 	
-	
+	/**
+	 * Focal Statistics method
+	 * 
+	 * @param radius
+	 * @param square
+	 * @param outLayerName Name of output Layer
+	 * @return Layer object storing the result of this operation
+	 */
 	public Layer focalVariety(int radius, boolean square, String outLayerName) {
 		Layer outLayer = new Layer(outLayerName, nRows, nCols, originX,
 				originY, resolution, nullValue);
 
 		// IMPORTANT! Need to create Delta and Mask
-		createDelta(radius);
-		createMask(radius, square);
+		Radius = radius;
+		createDelta();
+		createMask(square);
 		
 		for (int i = 0; i < nRows; i++) { // loop nRows
 			for (int j = 0; j < nCols; j++) { // loop nCols
 
 				// get list of neighbors
-				ArrayList<Integer> neighbors = getNeighborhood(i, j, radius);
+				ArrayList<Integer> neighbors = getNeighborhood(i, j);
 				
 				// get number of neighbors, if it is empty then continue
 				int numOfNeighbors = 0;
@@ -663,10 +700,8 @@ public class Layer {
 				
 				// assign to cell in outLayer
 				outLayer.values[i][j] = sum;
-
 			}
 		}
-
 		
 		return outLayer;
 	}

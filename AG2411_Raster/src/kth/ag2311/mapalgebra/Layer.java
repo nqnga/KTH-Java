@@ -522,26 +522,26 @@ public class Layer {
 	}
 	
 	
-	private int[][] dY;
-	private int[][] dX;
+	private int[][] dRow;
+	private int[][] dCol;
 	
 	private void createDelta(int radius) {
 		int size = radius*2 + 1;
 
 		int delta = -radius; 
-		this.dY = new int[size][size];
+		this.dRow = new int[size][size];
 		for (int i=0; i<size; i++) {
 			for (int j=0; j<size; j++) {
-				this.dY[i][j] = delta;
+				this.dRow[i][j] = delta;
 			}
 			delta++;
 		}
 		
-		this.dX = new int[size][size];
+		this.dCol = new int[size][size];
 		for (int i=0; i<size; i++) {
 			delta = -radius; 
 			for (int j=0; j<size; j++) {
-				this.dX[i][j] = delta;
+				this.dCol[i][j] = delta;
 				delta++;
 			}
 		}
@@ -560,15 +560,71 @@ public class Layer {
 				}
 			}
 		} else { // circle
+
+			// all are zeros
+			for (int i=0; i<size; i++) {
+				for (int j=0; j<size; j++) {
+					this.mask[i][j] = 0;
+				}
+			}
+
+			// get circle boundary
+			int xC = radius;
+			int yC = radius;
+			int d = (5 - radius * 4)/4;
+			int x = 0;
+			int y = radius;
+			do {
+				this.mask[yC + y][xC + x] = 1;
+				this.mask[yC - y][xC + x] = 1;
+				this.mask[yC + y][xC - x] = 1;
+				this.mask[yC - y][xC - x] = 1;
+				this.mask[yC + x][xC + y] = 1;
+				this.mask[yC - x][xC + y] = 1;
+				this.mask[yC + x][xC - y] = 1;
+				this.mask[yC - x][xC - y] = 1;
+				
+				if (d < 0) {
+					d += 2*x + 1;
+				} else {
+					d += 2*(x - y) + 1;
+					y--;
+				}
+				x++;
+			} while (x <= y);
+		
+			// fill in circle
+			for (int i=0; i<size; i++) {
+				// find left
+				int l = 0;
+				while (this.mask[i][l]==0 && l<size) l++;
+				// find right
+				int r = size-1;
+				while (this.mask[i][r]==0 && r>0) r--;
+				
+				// fill 1 from l to r
+				for (int j=l; j<r; j++) 
+					this.mask[i][j] = 1;
+			}
 			
 		}
-
-		// show mask
-
+				
 	}
-	
-	private ArrayList<Integer> getNeighborhood(int rIdx, int cIdx) {
+		
+	private ArrayList<Integer> getNeighborhood(int rIdx, int cIdx, int radius) {
 		ArrayList<Integer> neighbors = new ArrayList<Integer>();
+		int size = radius*2 + 1;
+		for (int i=0; i<size; i++) {
+			for (int j=0; j<size; j++) {
+				if (this.mask[i][j] == 1) {
+					// get real row and col after apply mask and delta
+					int row = rIdx + dRow[i][j];
+					int col = cIdx + dCol[i][j];
+					if (row>=0 && row<nRows && col>=0 && col<nCols) 
+						neighbors.add((int)this.values[row][col]);
+				}
+			}
+		}
 		
 		return neighbors;
 	}
@@ -586,7 +642,7 @@ public class Layer {
 			for (int j = 0; j < nCols; j++) { // loop nCols
 
 				// get list of neighbors
-				ArrayList<Integer> neighbors = getNeighborhood(i, j);
+				ArrayList<Integer> neighbors = getNeighborhood(i, j, radius);
 				
 				// get number of neighbors, if it is empty then continue
 				int numOfNeighbors = 0;

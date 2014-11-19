@@ -12,11 +12,14 @@ public class ex02 {
 		if (args.length >= 2) {
 			//Instantiate a layer
 			Layer layer = new Layer(args[0], args[1]);
-			//Show it on the screen
+			//Show it on the screen with gray scale level
 			layer.map();
+			//Show it on the screen with color
+			double[] color = {2.0,3.0};
+			layer.map(color);
 		} else {
 			System.out.println("Too few arguments ...");
-			System.out.println("Ex: ex02 Layer_Development c://ex1data//development.txt ...");
+			System.out.println("Ex: ex02 Layer_Development c:/DataJava/dev_ascii.txt ...");
 		}
 	}
 }

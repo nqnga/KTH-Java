@@ -7,6 +7,7 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Random;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -101,12 +102,8 @@ public class Layer {
 
 		// try to read content of fileName (path)
 		try {
-			bufReader = new BufferedReader(new FileReader(inputFile)); // put
-																		// data
-																		// of
-																		// filename
-																		// to
-																		// obj
+			// put data of filename to obj Reader
+			bufReader = new BufferedReader(new FileReader(inputFile)); 
 
 			String line = null;
 			String[] words; // separate by a space
@@ -164,8 +161,6 @@ public class Layer {
 
 			// IMPORTANT! Don't forget to create a matrix 2D of values
 			values = new double[nRows][nCols];
-			minValue = Double.MAX_VALUE;
-			maxValue = Double.MIN_VALUE;
 
 			// continue read data
 			for (int i = 0; i < nRows; i++) { // loop nRows
@@ -181,10 +176,6 @@ public class Layer {
 
 						// assign value to 2D-values
 						values[i][j] = value;
-						if (minValue > value)
-							minValue = value;
-						if (maxValue < value)
-							maxValue = value;
 					}
 				}
 			}
@@ -319,15 +310,54 @@ public class Layer {
 	}
 
 	/**
-	 * show this Layer as an gray scale image on the screen
+	 * Constant of max Gray Level
+	 */
+	private final static int maxGray = 255;
+	
+	/**
+	 * 
+	 * @return maximum value of image data
+	 */
+	public double getMax() {
+		maxValue = Double.MIN_VALUE;
+		for (int i = 0; i < nRows; i++) { // loop nRows
+			for (int j = 0; j < nCols; j++) { // loop nCols
+				double value = this.values[i][j];
+				if (maxValue < value && value!=nullValue)
+					maxValue = value;
+			}
+		}
+		return maxValue;
+	}
+	
+	/**
+	 * 
+	 * @return minimum value of image data
+	 */
+	public double getMin() {
+		minValue = Double.MAX_VALUE;
+		for (int i = 0; i < nRows; i++) { // loop nRows
+			for (int j = 0; j < nCols; j++) { // loop nCols
+				double value = this.values[i][j];
+				if (minValue > value && value!=nullValue)
+					minValue = value;
+			}
+		}
+		return minValue;
+	}
+	
+	/**
+	 * show this Layer as an gray-scale image on the screen
 	 */
 	public void map() {
 		BufferedImage image = new BufferedImage(nRows, nCols,
 				BufferedImage.TYPE_INT_RGB);
 		WritableRaster raster = image.getRaster();
-		int[] color = new int[3];
 
+		double grayscale = maxGray / (this.getMax() - this.getMin());
+		
 		// write data to raster
+		int[] color = new int[3];
 		for (int i = 0; i < nRows; i++) { // loop nRows
 			for (int j = 0; j < nCols; j++) { // loop nCols
 				// create color for this point
@@ -336,10 +366,10 @@ public class Layer {
 					color[1] = 0; // Green
 					color[2] = 0; // Blue
 				} else {
-					int grayscale = (int) Math.floor(values[i][j] - minValue);
-					color[0] = grayscale; // Red
-					color[1] = grayscale; // Green
-					color[2] = grayscale; // Blue
+					int value = (int) (values[i][j] * grayscale);
+					color[0] = value; // Red
+					color[1] = value; // Green
+					color[2] = value; // Blue
 				}
 				raster.setPixel(i, j, color);
 			}
@@ -352,7 +382,7 @@ public class Layer {
 
 		jlabel.setIcon(ii);
 		jframe.add(jlabel);
-		jframe.setSize(nRows, nCols);
+		jframe.setSize(nCols + 25, nRows + 50);
 		jframe.setVisible(true);
 
 	}
@@ -360,24 +390,51 @@ public class Layer {
 	/**
 	 * show this Layer as an color image on the screen using 24bit RGBA
 	 * 
-	 * @param colorScheme
-	 *            value of 24bit RGBA
+	 * @param interestingValues
+	 *            list of interesting values
 	 */
-	public void map(double[] colorScheme) {
+	public void map(double[] interestingValues) {
 		BufferedImage image = new BufferedImage(nRows, nCols, BufferedImage.TYPE_INT_RGB); 
 		WritableRaster raster = image.getRaster();
-		double[] attr = new double [4];
+		
+		double grayscale = maxGray / (this.getMax() - this.getMin());
+		// create random color for each interesting values
+	    Random rand = new Random();
+		int numOfInterest = interestingValues.length;
+		int[][] colorPanel = new int[numOfInterest][3];
+		for (int k = 0; k<numOfInterest; k++) {
+			colorPanel[k][0] = rand.nextInt(maxGray + 1);
+			colorPanel[k][1] = rand.nextInt(maxGray + 1);
+			colorPanel[k][2] = rand.nextInt(maxGray + 1);
+		}
 		
 		// write data to raster
+		int[] color = new int[3];
 		for (int i = 0; i < nRows; i++) { // loop nRows
 			for (int j = 0; j < nCols; j++) { // loop nCols
 				// create color for this point
-				double value = values[i][j];
-				attr[0] = (colorScheme[0] * value) / 255f; // read
-				attr[1] = (colorScheme[1] * value) / 255f; // green
-				attr[2] = (colorScheme[2] * value) / 255f; // blue
-				attr[3] = colorScheme[3] / 255f; // alpha
-				raster.setPixel(i, j, attr);
+				if (values[i][j]==nullValue) {
+					color[0] = 0; // Red
+					color[1] = 0; // Green
+					color[2] = 0; // Blue
+				} else {
+					// default color is grayscale
+					double value = values[i][j] * grayscale;
+					color[0] = (int) value; // Red
+					color[1] = (int) value; // Green
+					color[2] = (int) value; // Blue
+				
+					// get color for interesting value
+					for (int k = 0; k<numOfInterest; k++) {
+						if (interestingValues[k]==values[i][j]) {
+							color[0] = colorPanel[k][0]; // Red
+							color[1] = colorPanel[k][1]; // Green
+							color[2] = colorPanel[k][2]; // Blue
+							break;
+						}
+					}
+				}
+				raster.setPixel(i, j, color);
 			}
 		}
 		
@@ -388,7 +445,7 @@ public class Layer {
 		
 		jlabel.setIcon(ii);
 		jframe.add(jlabel);
-		jframe.setSize(nRows, nCols);
+		jframe.setSize(nCols + 25, nRows + 50);
 		jframe.setVisible(true);
 		
 	}

@@ -20,7 +20,7 @@ public class ex01 {
 			layer.save(args[2]);
 		} else {
 			System.out.println("Too many or few arguments ...");
-			System.out.println("Ex: ex01 Layer_Development c://ex1data//development.txt c://ex01data//development.out");
+			System.out.println("Ex: ex01 Layer_Development c:/DataJava/dev_ascii.txt c:/DataJava/dev_ascii.out");
 		}
 	}
 	

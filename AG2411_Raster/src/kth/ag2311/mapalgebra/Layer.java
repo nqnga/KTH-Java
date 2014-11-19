@@ -426,10 +426,6 @@ public class Layer {
 		jframe.setVisible(true);
 
 	}
-	/**
-	 * Default RGBA for NODATA cells
-	 */
-	private final static double[] nullColor = {0f,0f,0f,1f} ;
 
 	/**
 	 * show this Layer as an color image on the screen using 24bit RGBA
@@ -458,9 +454,9 @@ public class Layer {
 			for (int j = 0; j < nCols; j++) { // loop nCols
 				// create color for this point
 				if (values[i][j]==nullValue) {
-					color[0] = 0; // Red
-					color[1] = 0; // Green
-					color[2] = 0; // Blue
+					color[0] = nullGray[0]; // Red
+					color[1] = nullGray[1]; // Green
+					color[2] = nullGray[2]; // Blue
 				} else {
 					// default color is grayscale
 					double value = values[i][j] * grayscale;

@@ -474,33 +474,53 @@ public class Layer {
 	}
 	
 	
-	private ArrayList<Integer> getNeighborhood(int idx, int radius, boolean square) {
-		ArrayList<Integer> neighbors = new ArrayList<Integer>();
+	private int[][] dY;
+	private int[][] dX;
+	
+	private void createDelta(int radius) {
+		int size = radius*2 + 1;
 
-		int sizeOfFilter = radius*2 + 1;
-
-		// create deltaX and deltaY
 		int delta = -radius; 
-		int[][] dY = new int[sizeOfFilter][sizeOfFilter];
-		for (int i=0; i<sizeOfFilter; i++) {
-			for (int j=0; j<sizeOfFilter; j++) {
-				dY[i][j] = delta;
+		this.dY = new int[size][size];
+		for (int i=0; i<size; i++) {
+			for (int j=0; j<size; j++) {
+				this.dY[i][j] = delta;
 			}
 			delta++;
 		}
 		
-		int[][] dX = new int[sizeOfFilter][sizeOfFilter];
-		for (int i=0; i<sizeOfFilter; i++) {
+		this.dX = new int[size][size];
+		for (int i=0; i<size; i++) {
 			delta = -radius; 
-			for (int j=0; j<sizeOfFilter; j++) {
-				dX[i][j] = delta;
+			for (int j=0; j<size; j++) {
+				this.dX[i][j] = delta;
 				delta++;
 			}
 		}
-		
-		// create mask layer
-		int[][] mask = new int[sizeOfFilter][sizeOfFilter];
-		
+	}
+	
+	
+	private int[][] mask;
+	
+	private void createMask(int radius, boolean square) {
+		int size = radius*2 + 1;
+		this.mask = new int[size][size];
+		if (square) {
+			for (int i=0; i<size; i++) {
+				for (int j=0; j<size; j++) {
+					this.mask[i][j] = 1;
+				}
+			}
+		} else { // circle
+			
+		}
+
+		// show mask
+
+	}
+	
+	private ArrayList<Integer> getNeighborhood(int rIdx, int cIdx) {
+		ArrayList<Integer> neighbors = new ArrayList<Integer>();
 		
 		return neighbors;
 	}
@@ -510,11 +530,15 @@ public class Layer {
 		Layer outLayer = new Layer(outLayerName, nRows, nCols, originX,
 				originY, resolution, nullValue);
 
+		// IMPORTANT! Need to create Delta and Mask
+		createDelta(radius);
+		createMask(radius, square);
+		
 		for (int i = 0; i < nRows; i++) { // loop nRows
 			for (int j = 0; j < nCols; j++) { // loop nCols
-				// calculate index of cell
-				int index = i * nCols + j;
-				ArrayList<Integer> neighbors = getNeighborhood(index, radius, square);
+
+				// get list of neighbors
+				ArrayList<Integer> neighbors = getNeighborhood(i, j);
 				
 				// get number of neighbors, if it is empty then continue
 				int numOfNeighbors = 0;
@@ -539,8 +563,6 @@ public class Layer {
 			}
 		}
 
-
-		
 		
 		return outLayer;
 	}

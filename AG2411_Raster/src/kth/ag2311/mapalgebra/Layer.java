@@ -717,53 +717,62 @@ public class Layer {
 		return outLayer;
 	}
 
+	/**
+	 * Zonal Statistics method: get Minimum value
+	 * 
+	 * @param zoneLayer Layer zone
+	 * @param outLayerName
+	 *            Name of output Layer
+	 * @return Layer object storing the result of this operation
+	 */
 	public Layer zonalMinimum(Layer zoneLayer, String outLayerName) {
 		Layer outLayer = new Layer(outLayerName, nRows, nCols, originX,
 				originY, resolution, nullValue);
 
 		// Create hash map of zoneIndex and min value of this zone
 		// Double = zoneIndex (key); Double = minimum value of this zone (value)
-		HashMap<Double, Double> zm = new HashMap<Double, Double> (); 
-		
+		HashMap<Double, Double> zm = new HashMap<Double, Double>();
+
 		for (int i = 0; i < nRows; i++) { // loop nRows
 			for (int j = 0; j < nCols; j++) { // loop nCols
 				double vZone = zoneLayer.values[i][j];
 				double vLayer = this.values[i][j];
-				
+
 				// ignore NODATA
-				if (vZone==nullValue) continue;
-				
+				if (vZone == nullValue)
+					continue;
+
 				// try to retrieve from hash map
 				Double zoneIdx = new Double(vZone);
 				Double minValue = zm.get(zoneIdx);
-				
+
 				// if not then create new
-				if ( minValue == null) {
+				if (minValue == null) {
 					zm.put(zoneIdx, vLayer);
 				} else {
 					// compare and update
-					if (minValue>vLayer) {
+					if (minValue > vLayer) {
 						zm.put(zoneIdx, vLayer);
 					}
 				}
 			}
 		}
-		
+
 		// create outLayer
 		for (int i = 0; i < nRows; i++) { // loop nRows
 			for (int j = 0; j < nCols; j++) { // loop nCols
-				double vZone = zoneLayer.values[i][j];				
+				double vZone = zoneLayer.values[i][j];
 				Double zoneIdx = new Double(vZone);
-				Double minValue = zm.get(zoneIdx);				
-				
-				if (vZone==nullValue) {
+				Double minValue = zm.get(zoneIdx);
+
+				if (vZone == nullValue) {
 					outLayer.values[i][j] = outLayer.nullValue;
 				} else {
 					outLayer.values[i][j] = minValue.doubleValue();
 				}
 			}
 		}
-		
+
 		return outLayer;
 	}
 

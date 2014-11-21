@@ -16,8 +16,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
-import org.xml.sax.HandlerBase;
-
 /**
  * What does Layer class use for?
  * 

@@ -17,7 +17,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 
 /**
- * What does Layer class use for?
+ * Storing a raster
  * 
  * @author Nga Nguyen
  *

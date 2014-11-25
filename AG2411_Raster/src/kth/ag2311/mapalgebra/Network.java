@@ -69,13 +69,13 @@ public class Network {
 				// If not, create it, assign it to tail or head, 
 				// and add them to nodeMap.
 				if (head == null) {
-					Node node = new Node(headName);
-					nodeMap.put(headName, node);
+					head = new Node(headName);
+					nodeMap.put(headName, head);
 				}
 
 				if (tail == null) {
-					Node node = new Node(tailName);
-					nodeMap.put(tailName, node);
+					tail = new Node(tailName);
+					nodeMap.put(tailName, tail);
 				}
 
 				// create two Arcs:
@@ -101,7 +101,7 @@ public class Network {
 			}
 		}
 		
-		System.out.print("Loaded.");
+		System.out.print(" ..Loaded");
 	}
 	
 	/**
@@ -139,7 +139,7 @@ public class Network {
 			}
 		}
 
-		System.out.print("Saved.");
+		System.out.print(" ..Saved");
 	}
 	
 	/**

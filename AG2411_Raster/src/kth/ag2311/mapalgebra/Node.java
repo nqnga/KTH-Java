@@ -32,5 +32,6 @@ public class Node {
 	 */
 	public Node(String name) {
 		this.name = name;
+		outArcs = new LinkedList<Arc>();
 	}
 }

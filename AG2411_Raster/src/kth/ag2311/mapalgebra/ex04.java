@@ -11,7 +11,7 @@ public class ex04 {
 
 	public static void main (String[] args) {
 		if (args.length == 3) {
-			//Instantiate a layer
+			//Instantiate a network
 			Network network = new Network(args[0], args[1]);
 			
 			//Printing it on the console

@@ -1,7 +1,7 @@
 package kth.ag2311.mapalgebra;
 
 /**
- * <h1> Exercise 1 <h1>
+ * <h1>Exercise 1<h1>
  * Test load and save Layer class
  * 
  * @author Nga Nguyen

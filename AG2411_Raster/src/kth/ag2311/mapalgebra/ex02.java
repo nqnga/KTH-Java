@@ -1,7 +1,7 @@
 package kth.ag2311.mapalgebra;
 
 /**
- * <h1> Exercise 2 <h1>
+ * <h1>Exercise 2<h1>
  * Test view Layer on the screen
  * 
  * @author Nga Nguyen

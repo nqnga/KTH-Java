@@ -1,7 +1,7 @@
 package kth.ag2311.mapalgebra;
 
 /**
- * <h1>Exercise 3 <h1>
+ * <h1>Exercise 3<h1>
  * Test operation on Layer - localSum - focalVariety - zonalMinimum
  * 
  * @author Nga Nguyen

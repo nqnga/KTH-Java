@@ -1,4 +1,4 @@
-package kth.ag2311.mapalgebra;
+package kth.ag2311.mapalgebra.model;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

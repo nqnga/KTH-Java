@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
-<listEntry value="/AG2411_Raster/src/kth/ag2311/mapalgebra/ex01.java"/>
+<listEntry value="/AG2411_Raster/src/kth/ag2311/mapalgebra/exercises/ex01.java"/>
 </listAttribute>
 <listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
 <listEntry value="1"/>
 </listAttribute>
-<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="kth.ag2311.mapalgebra.ex01"/>
+<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="kth.ag2311.mapalgebra.exercises.ex01"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="layerD &quot;C:\Users\Quynh Nga\Desktop\GISA\ex1data\development.txt&quot; &quot;C:\Users\Quynh Nga\Desktop\GISA\ex1data\development.out&quot;"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="AG2411_Raster"/>
 </launchConfiguration>

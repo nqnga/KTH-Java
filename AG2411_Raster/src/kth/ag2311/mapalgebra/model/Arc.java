@@ -1,4 +1,4 @@
-package kth.ag2311.mapalgebra;
+package kth.ag2311.mapalgebra.model;
 
 /**
  * Storing a Arc content 2 nodes (head and tail) and weight of this arc

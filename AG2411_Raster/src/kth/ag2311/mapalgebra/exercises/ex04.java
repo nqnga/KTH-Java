@@ -1,4 +1,6 @@
-package kth.ag2311.mapalgebra;
+package kth.ag2311.mapalgebra.exercises;
+
+import kth.ag2311.mapalgebra.model.Network;
 
 /**
  * <h1>Exercise 4<h1>
